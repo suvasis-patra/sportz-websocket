@@ -1,0 +1,83 @@
+import { desc } from "drizzle-orm";
+import { MAX_LIMIT } from "../constants.js";
+import { db } from "../db/db.js";
+import { matches } from "../db/schema.js";
+import { getMatchStatus } from "../utils/matches.js";
+import {
+  createMatchSchema,
+  listMatchesQuerySchema,
+} from "../validations/index.js";
+
+export const createNewMatch = async (req, res) => {
+  const validateMatchData = createMatchSchema.safeParse(req.body);
+
+  if (!validateMatchData.success) {
+    return res.status(400).json({
+      error: "Invalid data format",
+      details: validateMatchData.error,
+    });
+  }
+
+  const {
+    sport,
+    homeTeamName,
+    awayTeamName,
+    startTime,
+    endTime,
+    homeTeamScore,
+    awayTeamScore,
+  } = validateMatchData.data;
+
+  try {
+    const [event] = await db
+      .insert(matches)
+      .values({
+        sport,
+        homeTeamName,
+        awayTeamName,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        status: getMatchStatus(startTime, endTime),
+        homeTeamScore: homeTeamScore ?? 0,
+        awayTeamScore: awayTeamScore ?? 0,
+      })
+      .returning();
+
+    return res.status(201).json({
+      message: "new match added",
+      data: event,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error: "failed to create new match",
+      details: error?.message,
+    });
+  }
+};
+
+export const getMatches = async (req, res) => {
+  const validatedData = listMatchesQuerySchema.safeParse(req.params);
+  if (!validatedData.success) {
+    res.status(400).json({
+      error: "Invalid data format",
+      details: JSON.stringify(validatedData.error),
+    });
+  }
+  const limit = Math.min(validatedData.data.limit ?? 50, MAX_LIMIT);
+  try {
+    const data = await db
+      .select()
+      .from(matches)
+      .orderBy(desc(matches.createdAt))
+      .limit(limit);
+
+    res.status(200).json({ message: "success", data });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: "failed to get new matches",
+      details: error?.message,
+    });
+  }
+};
