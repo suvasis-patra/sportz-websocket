@@ -2,7 +2,7 @@ import { desc } from "drizzle-orm";
 import { MAX_LIMIT } from "../constants.js";
 import { db } from "../db/db.js";
 import { matches } from "../db/schema.js";
-import { getMatchStatus } from "../utils/matches.js";
+import { getMatchStatus, syncMatchStatus } from "../utils/matches.js";
 import {
   createMatchSchema,
   listMatchesQuerySchema,
@@ -57,11 +57,11 @@ export const createNewMatch = async (req, res) => {
 };
 
 export const getMatches = async (req, res) => {
-  const validatedData = listMatchesQuerySchema.safeParse(req.params);
+  const validatedData = listMatchesQuerySchema.safeParse(req.query);
   if (!validatedData.success) {
-    res.status(400).json({
+    return res.status(400).json({
       error: "Invalid data format",
-      details: JSON.stringify(validatedData.error),
+      details: validatedData.error.issues,
     });
   }
   const limit = Math.min(validatedData.data.limit ?? 50, MAX_LIMIT);
@@ -72,7 +72,9 @@ export const getMatches = async (req, res) => {
       .orderBy(desc(matches.createdAt))
       .limit(limit);
 
-    res.status(200).json({ message: "success", data });
+    const matchList = syncMatchStatus(data);
+
+    res.status(200).json({ message: "success", matchList });
   } catch (error) {
     console.log(error);
     res.status(500).json({

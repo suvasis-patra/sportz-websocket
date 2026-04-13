@@ -4,7 +4,7 @@ export const getMatchStatus = (startTime, endTime, now = new Date()) => {
   const start = new Date(startTime);
   const end = new Date(endTime);
 
-  if (Number.isNaN(start) || Number.isNaN(end)) {
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     return null;
   }
 
@@ -17,4 +17,8 @@ export const getMatchStatus = (startTime, endTime, now = new Date()) => {
 
   return MATCH_STATUS.LIVE;
 };
-export const syncMatchStatus = () => {};
+export const syncMatchStatus = (matchList) => {
+  return matchList.map((match) => {
+    return { ...match, status: getMatchStatus(match.startTime, match.endTime) };
+  });
+};
