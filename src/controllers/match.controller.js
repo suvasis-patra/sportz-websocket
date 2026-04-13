@@ -43,6 +43,9 @@ export const createNewMatch = async (req, res) => {
       })
       .returning();
 
+    if (res.app.locals.broadcastCreatedMatch) {
+      res.app.locals.broadcastCreatedMatch(event);
+    }
     return res.status(201).json({
       message: "new match added",
       data: event,
