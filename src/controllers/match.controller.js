@@ -43,6 +43,13 @@ export const createNewMatch = async (req, res) => {
       })
       .returning();
 
+    if (typeof res.app.locals.broadcastCreatedMatch === "function") {
+      try {
+        res.app.locals.broadcastCreatedMatch(event);
+      } catch (broadcastError) {
+        console.error("failed to broadcast created match", broadcastError);
+      }
+    }
     return res.status(201).json({
       message: "new match added",
       data: event,
