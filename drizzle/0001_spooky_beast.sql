@@ -1,0 +1,1 @@
+ALTER TABLE "commentry" ALTER COLUMN "minute" SET DATA TYPE integer;

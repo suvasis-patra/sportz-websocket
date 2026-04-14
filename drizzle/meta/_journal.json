@@ -8,6 +8,13 @@
       "when": 1776048855536,
       "tag": "0000_messy_sersi",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776150632638,
+      "tag": "0001_spooky_beast",
+      "breakpoints": true
     }
   ]
 }
