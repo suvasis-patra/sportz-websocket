@@ -42,7 +42,7 @@ export const createNewMatch = async (req, res) => {
         awayTeamScore: awayTeamScore ?? 0,
       })
       .returning();
-
+    // TODO: implement dependency injection or event emitter pattern
     if (typeof res.app.locals.broadcastCreatedMatch === "function") {
       try {
         res.app.locals.broadcastCreatedMatch(event);
