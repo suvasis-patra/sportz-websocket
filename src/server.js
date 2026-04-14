@@ -1,6 +1,9 @@
 import http from "http";
 import express from "express";
+
 import { matchRouter } from "./routes/match.route.js";
+import { commentryRouter } from "./routes/comentry.route.js";
+
 import { middlewareSecurity } from "./utils/arcjet.js";
 import { attachWebsocketServer } from "./websocket/server.js";
 
@@ -19,6 +22,7 @@ app.get("/", (req, res) => {
 app.use(middlewareSecurity());
 
 app.use("/matches", matchRouter);
+app.use("/commentry/:id/matches", commentryRouter);
 
 const { broadcastCreatedMatch } = attachWebsocketServer(server);
 app.locals.broadcastCreatedMatch = broadcastCreatedMatch;
